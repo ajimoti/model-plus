@@ -29,7 +29,10 @@
                                 <tr>
                                     @foreach($records->first()?->getAttributes() ?? [] as $column => $value)
                                         <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                            {{ $column }}
+                                            {{ Str::title(str_replace('_', ' ', $column)) }}
+                                            @if(Str::endsWith($column, '_id') && isset($relationships[Str::beforeLast($column, '_id')]))
+                                                <span class="ml-1 text-xs text-gray-500">({{ $relationships[Str::beforeLast($column, '_id')]['type'] }})</span>
+                                            @endif
                                         </th>
                                     @endforeach
                                     <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -40,13 +43,46 @@
                             <tbody class="divide-y divide-gray-200 bg-white">
                                 @foreach($records as $record)
                                     <tr>
-                                        @foreach($record->getAttributes() as $value)
+                                        @foreach($record->getAttributes() as $column => $value)
                                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                {{ $value }}
+                                                @if(Str::endsWith($column, '_id') && isset($relationships[Str::beforeLast($column, '_id')]))
+                                                    @php
+                                                        $relationName = Str::beforeLast($column, '_id');
+                                                        $relatedRecord = $record->{$relationName};
+                                                        $displayColumn = $relatedRecord ? 
+                                                            collect($relatedRecord->getAttributes())
+                                                                ->filter(fn($val, $key) => 
+                                                                    in_array(gettype($val), ['string']) && 
+                                                                    !in_array($key, ['password', 'remember_token'])
+                                                                )
+                                                                ->keys()
+                                                                ->first() : null;
+                                                    @endphp
+                                                    @if($relatedRecord && $displayColumn)
+                                                        <a href="#" 
+                                                           @click.prevent="loadModel('{{ Str::plural(Str::snake(class_basename(get_class($relatedRecord)))) }}', null)"
+                                                           class="text-indigo-600 hover:text-indigo-900">
+                                                            {{ $relatedRecord->{$displayColumn} }}
+                                                            <span class="text-gray-400 text-xs">(#{{ $value }})</span>
+                                                        </a>
+                                                    @else
+                                                        <span class="text-gray-400">{{ $value ?? 'N/A' }}</span>
+                                                    @endif
+                                                @else
+                                                    {{ $value }}
+                                                @endif
                                             </td>
                                         @endforeach
                                         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                            <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                            <div class="flex justify-end gap-2">
+                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                                    Edit
+                                                </a>
+                                                <span class="text-gray-300">|</span>
+                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">
+                                                    View
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

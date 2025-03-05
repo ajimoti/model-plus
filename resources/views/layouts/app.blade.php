@@ -7,6 +7,23 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/@heroicons/v2/24/outline@0.1.0/index.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .relation-link {
+            @apply text-indigo-600 hover:text-indigo-900 transition-colors duration-150;
+        }
+        
+        .relation-badge {
+            @apply inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10;
+        }
+        
+        .table-hover tr:hover {
+            @apply bg-gray-50 transition-colors duration-150;
+        }
+        
+        .action-button {
+            @apply inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
+        }
+    </style>
 </head>
 <body class="h-full" x-data="{ 
     sidebarOpen: false,

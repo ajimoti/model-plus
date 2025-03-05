@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Vendor\ModelPlus\Services;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Component\Finder\Finder;
 
 final class ModelDiscoveryService
@@ -44,6 +46,39 @@ final class ModelDiscoveryService
     {
         $map = $this->getModelMap();
         return array_search($slug, $map) ?: null;
+    }
+
+    public function getModelRelationships(string $modelClass): array
+    {
+        $relationships = [];
+        $reflection = new ReflectionClass($modelClass);
+        
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if ($method->getNumberOfParameters() > 0) {
+                continue;
+            }
+
+            try {
+                $returnType = $method->getReturnType();
+                if (!$returnType) {
+                    continue;
+                }
+
+                $returnTypeName = $returnType->getName();
+                if (!is_subclass_of($returnTypeName, Relation::class)) {
+                    continue;
+                }
+
+                $relationships[$method->getName()] = [
+                    'type' => class_basename($returnTypeName),
+                    'method' => $method->getName(),
+                ];
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        return $relationships;
     }
 
     private function buildModelMap(): array
@@ -105,5 +140,24 @@ final class ModelDiscoveryService
         } catch (\Throwable) {
             return false;
         }
+    }
+
+    private function getFirstStringColumn(Model $model): ?string
+    {
+        $columns = $model->getConnection()
+            ->getSchemaBuilder()
+            ->getColumnListing($model->getTable());
+
+        foreach ($columns as $column) {
+            $type = $model->getConnection()
+                ->getSchemaBuilder()
+                ->getColumnType($model->getTable(), $column);
+            
+            if (in_array($type, ['string', 'text']) && !in_array($column, ['password', 'remember_token'])) {
+                return $column;
+            }
+        }
+
+        return null;
     }
 } 

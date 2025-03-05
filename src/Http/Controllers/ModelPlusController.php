@@ -45,6 +45,14 @@ final class ModelPlusController extends Controller
             // Implementation depends on your requirements
         }
 
+        // Detect and eager load relationships
+        $modelInstance = new $modelClass;
+        $relationships = $this->modelDiscovery->getModelRelationships($modelClass);
+
+        if (!empty($relationships)) {
+            $query->with(array_keys($relationships));
+        }
+
         $records = $query->paginate(
             Config::get('modelplus.pagination.per_page', 15)
         );
@@ -55,7 +63,8 @@ final class ModelPlusController extends Controller
             'records' => $records,
             'models' => $this->modelDiscovery->getModels(),
             'modelMap' => $this->modelDiscovery->getModelMap(),
-            'title' => Str::title(class_basename($modelClass))
+            'title' => Str::title(class_basename($modelClass)),
+            'relationships' => $relationships,
         ];
 
         // Return only the content portion for AJAX requests
