@@ -51,6 +51,7 @@ final class ModelPlusController extends Controller
 
         return View::make('modelplus::show', [
             'model' => $modelClass,
+            'modelName' => Str::title(Str::snake(class_basename($modelClass), ' ')),
             'records' => $records,
             'models' => $this->modelDiscovery->getModels(),
             'modelMap' => $this->modelDiscovery->getModelMap(),
