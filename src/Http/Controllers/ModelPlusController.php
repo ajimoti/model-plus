@@ -30,7 +30,7 @@ final class ModelPlusController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $model): ViewResponse
+    public function show(Request $request, string $model): mixed
     {
         $modelClass = $this->modelDiscovery->resolveModelClass($model);
         
@@ -49,13 +49,20 @@ final class ModelPlusController extends Controller
             Config::get('modelplus.pagination.per_page', 15)
         );
 
-        return View::make('modelplus::show', [
+        $viewData = [
             'model' => $modelClass,
             'modelName' => Str::title(Str::snake(class_basename($modelClass), ' ')),
             'records' => $records,
             'models' => $this->modelDiscovery->getModels(),
             'modelMap' => $this->modelDiscovery->getModelMap(),
             'title' => Str::title(class_basename($modelClass))
-        ]);
+        ];
+
+        // Return only the content portion for AJAX requests
+        if ($request->get('partial')) {
+            return View::make('modelplus::show-partial', $viewData);
+        }
+
+        return View::make('modelplus::show', $viewData);
     }
 } 
