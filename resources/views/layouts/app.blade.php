@@ -14,22 +14,44 @@
     loading: false,
     content: '',
     searchQuery: '',
-    async loadModel(modelSlug) {
+    async loadModel(modelSlug, queryParams = null) {
         if (this.loading) return;
         
         this.loading = true;
-        const url = `{{ route('modelplus.show', ['model' => ':slug']) }}`.replace(':slug', modelSlug);
+        let url = `{{ route('modelplus.show', ['model' => ':slug']) }}`.replace(':slug', modelSlug);
+        
+        // Create URL object for proper query parameter handling
+        const urlObj = new URL(url, window.location.origin);
+        
+        // Add partial parameter
+        urlObj.searchParams.append('partial', 'true');
+        
+        // Add search query if present
+        if (this.searchQuery) {
+            urlObj.searchParams.append('search', this.searchQuery);
+        }
+        
+        // Add pagination params if present
+        if (queryParams) {
+            if (typeof queryParams === 'string') {
+                const params = new URLSearchParams(queryParams);
+                params.forEach((value, key) => {
+                    urlObj.searchParams.append(key, value);
+                });
+            }
+        }
         
         try {
-            const response = await fetch(`${url}?partial=true`);
+            const response = await fetch(urlObj.toString());
             if (!response.ok) throw new Error('Network response was not ok');
             
             const html = await response.text();
-            this.content = html;
+            this.content = html; // This will update the content
             this.currentModel = modelSlug;
             
-            // Update URL without page refresh
-            window.history.pushState({}, '', url);
+            // Update URL without page refresh (exclude 'partial' from visible URL)
+            urlObj.searchParams.delete('partial');
+            window.history.pushState({}, '', urlObj.toString());
         } catch (error) {
             console.error('Error loading model:', error);
         } finally {
@@ -40,13 +62,15 @@
         // Handle browser back/forward buttons
         window.addEventListener('popstate', () => {
             const modelSlug = window.location.pathname.split('/').pop();
-            if (modelSlug) this.loadModel(modelSlug);
+            const queryString = window.location.search.substring(1);
+            if (modelSlug) this.loadModel(modelSlug, queryString);
         });
         
         // Load initial content if we're on a model page
         const initialModel = window.location.pathname.split('/').pop();
         if (initialModel && initialModel !== 'modelplus') {
-            this.loadModel(initialModel);
+            const queryString = window.location.search.substring(1);
+            this.loadModel(initialModel, queryString);
         }
     }
 }">
@@ -188,11 +212,9 @@
                     
                     <!-- Dynamic content area -->
                     <div x-show="!loading">
-                        @if(isset($model))
-                            <div x-html="content"></div>
-                        @else
+                        <div x-html="content">
                             @yield('content')
-                        @endif
+                        </div>
                     </div>
                 </div>
             </main>
