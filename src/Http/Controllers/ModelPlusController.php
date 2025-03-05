@@ -25,14 +25,16 @@ final class ModelPlusController extends Controller
     {
         return View::make('modelplus::index', [
             'models' => $this->modelDiscovery->getModels(),
+            'modelMap' => $this->modelDiscovery->getModelMap(),
             'title' => 'Dashboard'
         ]);
     }
 
     public function show(Request $request, string $model): ViewResponse
     {
-        $modelClass = urldecode($model);
-        if (!class_exists($modelClass)) {
+        $modelClass = $this->modelDiscovery->resolveModelClass($model);
+        
+        if (!$modelClass || !class_exists($modelClass)) {
             abort(404, 'Model not found');
         }
 
@@ -51,6 +53,7 @@ final class ModelPlusController extends Controller
             'model' => $modelClass,
             'records' => $records,
             'models' => $this->modelDiscovery->getModels(),
+            'modelMap' => $this->modelDiscovery->getModelMap(),
             'title' => Str::title(class_basename($modelClass))
         ]);
     }

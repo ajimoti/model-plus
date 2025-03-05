@@ -9,12 +9,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use ReflectionClass;
 use Symfony\Component\Finder\Finder;
 
 final class ModelDiscoveryService
 {
     private const CACHE_KEY = 'modelplus.discovered_models';
+    private const MODEL_MAP_CACHE_KEY = 'modelplus.model_map';
 
     public function __construct(
         private readonly array $modelPaths
@@ -27,6 +29,31 @@ final class ModelDiscoveryService
             Carbon::now()->addHour(), 
             fn() => $this->discoverModels()
         );
+    }
+
+    public function getModelMap(): array
+    {
+        return Cache::remember(
+            self::MODEL_MAP_CACHE_KEY,
+            Carbon::now()->addHour(),
+            fn() => $this->buildModelMap()
+        );
+    }
+
+    public function resolveModelClass(string $slug): ?string
+    {
+        $map = $this->getModelMap();
+        return array_search($slug, $map) ?: null;
+    }
+
+    private function buildModelMap(): array
+    {
+        $map = [];
+        foreach ($this->getModels() as $modelClass) {
+            $slug = Str::plural(Str::lower(class_basename($modelClass)));
+            $map[$modelClass] = $slug;
+        }
+        return $map;
     }
 
     private function discoverModels(): Collection

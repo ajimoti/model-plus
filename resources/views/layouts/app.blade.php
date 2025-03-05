@@ -53,7 +53,7 @@
                                     <ul role="list" class="-mx-2 space-y-1">
                                         @foreach($models as $m)
                                             <li>
-                                                <a href="{{ route('modelplus.show', ['model' => urlencode($m)]) }}"
+                                                <a href="{{ route('modelplus.show', ['model' => $modelMap[$m] ?? '']) }}"
                                                    class="{{ isset($model) && $m === $model ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50' }} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
                                                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
@@ -86,7 +86,7 @@
                             <ul role="list" class="-mx-2 space-y-1">
                                 @foreach($models as $m)
                                     <li>
-                                        <a href="{{ route('modelplus.show', ['model' => urlencode($m)]) }}"
+                                        <a href="{{ route('modelplus.show', ['model' => $modelMap[$m] ?? '']) }}"
                                            class="{{ isset($model) && $m === $model ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50' }} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
                                             <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
@@ -112,18 +112,20 @@
                 </button>
 
                 <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-                    <form class="relative flex flex-1" action="{{ route('modelplus.show', ['model' => isset($model) ? urlencode($model) : '']) }}" method="GET">
-                        <label for="search-field" class="sr-only">Search</label>
-                        <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-                        </svg>
-                        <input id="search-field"
-                               class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                               placeholder="Search..."
-                               type="search"
-                               name="search"
-                               value="{{ request('search') }}">
-                    </form>
+                    @if(isset($model))
+                        <form class="relative flex flex-1" action="{{ route('modelplus.show', ['model' => $modelMap[$model] ?? '']) }}" method="GET">
+                            <label for="search-field" class="sr-only">Search</label>
+                            <svg class="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                            </svg>
+                            <input id="search-field"
+                                   class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
+                                   placeholder="Search..."
+                                   type="search"
+                                   name="search"
+                                   value="{{ request('search') }}">
+                        </form>
+                    @endif
                 </div>
             </div>
 
