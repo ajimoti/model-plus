@@ -1,0 +1,19 @@
+modelplus/
+├── config/
+│   └── modelplus.php
+├── resources/
+│   ├── js/
+│   │   └── components/
+│   └── views/
+├── routes/
+│   └── web.php
+├── src/
+│   ├── Console/
+│   ├── Facades/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   └── Middleware/
+│   ├── Services/
+│   └── ModelPlusServiceProvider.php
+├── composer.json
+└── README.md 
