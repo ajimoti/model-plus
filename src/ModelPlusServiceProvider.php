@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Container\Container;
 use Vendor\ModelPlus\Services\ModelDiscoveryService;
+use Vendor\ModelPlus\Helpers\ViewHelpers;
 
 final class ModelPlusServiceProvider extends BaseServiceProvider
 {
@@ -32,6 +33,8 @@ final class ModelPlusServiceProvider extends BaseServiceProvider
                 Config::get('modelplus.model_paths', [App::path('Models')])
             );
         });
+
+        $this->app->singleton(ViewHelpers::class);
     }
 
     public function boot(): void

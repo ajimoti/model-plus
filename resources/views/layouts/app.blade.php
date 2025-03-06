@@ -23,6 +23,78 @@
         .action-button {
             @apply inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
         }
+        
+        .table-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        .table-scroll-container {
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        /* Remove the gradient shadows completely */
+        .table-scroll-container::before,
+        .table-scroll-container::after {
+            display: none;
+        }
+        
+        /* Fixed first column */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            background-color: white;
+            transition: box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        
+        /* Update background color when in header */
+        thead .sticky-col {
+            background-color: rgb(249 250 251); /* Matches Tailwind's bg-gray-50 */
+            z-index: 3;
+        }
+        
+        /* Ensure proper background on row hover */
+        tr:hover .sticky-col {
+            background-color: rgb(249 250 251); /* Matches Tailwind's hover:bg-gray-50 */
+        }
+        
+        /* Modern shadow effect on scroll */
+        .table-scroll-container.shadow-start .sticky-col {
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Ensure proper z-indexing for shadow effects */
+        .table-scroll-container.shadow-start thead .sticky-col {
+            box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Table cell styles */
+        .table-cell {
+            @apply px-3 py-4 text-sm text-gray-500;
+            position: relative;
+        }
+        
+        /* Cell content handling */
+        .cell-content {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .cell-content-wrap {
+            white-space: normal;
+            word-break: break-word;
+        }
+        
+        /* Modern button styles */
+        .table-action-btn {
+            @apply inline-flex items-center px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200;
+        }
     </style>
 </head>
 <body class="h-full" x-data="{ 

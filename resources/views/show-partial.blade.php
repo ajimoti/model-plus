@@ -1,38 +1,71 @@
 @php
-    function getSortIcon($column, $currentSort, $currentDirection) {
-        if ($currentSort !== $column) {
-            return <<<HTML
-                <svg class="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-50" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
-HTML;
-        }
-        
-        if ($currentDirection === 'asc') {
-            return <<<HTML
-                <svg class="w-3 h-3 ml-1.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/>
-                </svg>
-HTML;
-        }
-        
-        return <<<HTML
-            <svg class="w-3 h-3 ml-1.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-            </svg>
-HTML;
-    }
+    use Vendor\ModelPlus\Helpers\ViewHelpers;
+    use Illuminate\Support\Str;
 @endphp
+
+<div x-data="{ 
+    sortColumn: '{{ $sortColumn ?? null }}',
+    sortDirection: '{{ $sortDirection ?? 'asc' }}',
+    
+    sortTable(column) {
+        this.sortDirection = (this.sortColumn === column && this.sortDirection === 'asc') ? 'desc' : 'asc';
+        this.sortColumn = column;
+        
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort', column);
+        url.searchParams.set('direction', this.sortDirection);
+        url.searchParams.set('partial', true);
+        
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
+                const newTableContainer = temp.querySelector('#table-container');
+                document.getElementById('table-container').innerHTML = newTableContainer.innerHTML;
+                
+                // Update URL without page refresh
+                const newUrl = new URL(window.location.href);
+                newUrl.searchParams.set('sort', column);
+                newUrl.searchParams.set('direction', this.sortDirection);
+                window.history.pushState({}, '', newUrl);
+            })
+            .catch(error => console.error('Error:', error));
+    },
+
+    editRecord(model, id) {
+        // TODO: Implement edit functionality
+        console.log('Edit record:', model, id);
+    },
+
+    viewRecord(model, id) {
+        // TODO: Implement view functionality
+        console.log('View record:', model, id);
+    },
+
+    deleteRecord(model, id) {
+        if (!confirm('Are you sure you want to delete this record?')) {
+            return;
+        }
+        
+        // TODO: Implement delete functionality
+        console.log('Delete record:', model, id);
+    }
+}">
 
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
-        <h1 class="text-base font-semibold leading-6 text-gray-900">{{ $modelName }}</h1>
-        <p class="mt-2 text-sm text-gray-700">A list of all {{ strtolower($modelName) }} records in your database.</p>
+        <h1 class="text-base font-semibold leading-6 text-gray-900">
+            {{ Str::title(str_replace('_', ' ', class_basename($model))) }}
+        </h1>
+        <p class="mt-2 text-sm text-gray-700">
+            A list of all {{ Str::lower(str_replace('_', ' ', class_basename($model))) }} records in your database.
+        </p>
     </div>
     @if(!isset($error))
     <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
         <button type="button" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Add {{ $modelName }}
+            Add {{ Str::title(str_replace('_', ' ', class_basename($model))) }}
         </button>
     </div>
     @endif
@@ -81,42 +114,69 @@ HTML;
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 <h3 class="mt-2 text-sm font-semibold text-gray-900">No records found</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by creating a new {{ strtolower($modelName) }}.</p>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new {{ strtolower(class_basename($model)) }}.</p>
             </div>
         @else
-            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-300">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    @foreach($records->first()?->getAttributes() ?? [] as $column => $value)
-                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                            <button type="button" 
-                                                    @click.prevent="sortTable('{{ $column }}')"
-                                                    class="group inline-flex items-center">
-                                                {{ Str::title(str_replace('_', ' ', $column)) }}
-                                                @if(isset($relationships['foreign_keys'][$column]))
-                                                    @php
-                                                        $relationMethod = $relationships['foreign_keys'][$column];
-                                                        $relationType = $relationships['methods'][$relationMethod]['type'];
-                                                    @endphp
-                                                    <span class="ml-1 text-xs text-gray-500">({{ $relationType }})</span>
-                                                @endif
-                                                {!! getSortIcon($column, $sortColumn, $sortDirection) !!}
-                                            </button>
-                                        </th>
-                                    @endforeach
-                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                        <span class="sr-only">Actions</span>
+            <div class="table-container">
+                <div class="table-scroll-container" x-data="tableScroll" @scroll="handleScroll">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                @foreach($records->first()?->getAttributes() ?? [] as $column => $value)
+                                    <th scope="col" 
+                                        @class([
+                                            'py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6',
+                                            'sticky-col' => $loop->first
+                                        ])>
+                                        <button type="button" 
+                                                @click.prevent="sortTable('{{ $column }}')"
+                                                class="group inline-flex items-center">
+                                            {{ Str::title(str_replace('_', ' ', $column)) }}
+                                            @if(isset($relationships['foreign_keys'][$column]))
+                                                @php
+                                                    $relationMethod = $relationships['foreign_keys'][$column];
+                                                    $relationType = $relationships['methods'][$relationMethod]['type'] ?? '';
+                                                @endphp
+                                                <span class="ml-1 text-xs text-gray-500">({{ $relationType }})</span>
+                                            @endif
+                                            {!! ViewHelpers::getSortIcon($column, $sortColumn ?? null, $sortDirection ?? 'asc') !!}
+                                        </button>
                                     </th>
+                                @endforeach
+                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-gray-200 bg-white">
+                            @foreach($records as $record)
+                                <tr class="hover:bg-gray-50">
+                                    @foreach($record->getAttributes() as $column => $value)
+                                        @if(isset($relationships['foreign_keys'][$column]))
+                                            @include('modelplus::partials.relationship-cell', [
+                                                'column' => $column,
+                                                'value' => $value,
+                                                'record' => $record,
+                                                'relationships' => $relationships,
+                                                'loop' => $loop
+                                            ])
+                                        @else
+                                            <td @class([
+                                                'whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6',
+                                                'sticky-col' => $loop->first,
+                                                'bg-white' => true
+                                            ])>
+                                                {{ $value }}
+                                            </td>
+                                        @endif
+                                    @endforeach
+                                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                        @include('modelplus::partials.row-actions', ['record' => $record])
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody id="table-body" class="divide-y divide-gray-200 bg-white">
-                                @include('modelplus::partials.table-rows')
-                            </tbody>
-                        </table>
-                    </div>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="mt-6" id="pagination">
@@ -125,6 +185,7 @@ HTML;
         @endif
     </div>
 @endif
+</div>
 
 <script>
     document.querySelectorAll('.pagination a').forEach(link => {
@@ -152,5 +213,21 @@ HTML;
                 console.error('Error loading data:', error);
             }
         });
+    });
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('tableScroll', () => ({
+            init() {
+                this.handleScroll({ target: this.$el });
+            },
+            handleScroll(e) {
+                const el = e.target;
+                const isStart = el.scrollLeft > 0;
+                const isEnd = el.scrollLeft + el.clientWidth < el.scrollWidth;
+                
+                el.classList.toggle('shadow-start', isStart);
+                el.classList.toggle('shadow-end', isEnd);
+            }
+        }));
     });
 </script> 

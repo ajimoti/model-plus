@@ -31,7 +31,7 @@ final class ModelPlusController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $model): mixed
+    public function show(Request $request, string $model)
     {
         $modelClass = $this->modelDiscovery->resolveModelClass($model);
         
@@ -42,17 +42,21 @@ final class ModelPlusController extends Controller
         // Get relationships first to check for table existence
         $relationships = $this->modelDiscovery->getModelRelationships($modelClass);
 
+        $viewData = [
+            'model' => $modelClass,
+            'modelName' => Str::title(str_replace('_', ' ', class_basename($modelClass))),
+            'models' => $this->modelDiscovery->getModels(),
+            'modelMap' => $this->modelDiscovery->getModelMap(),
+            'relationships' => $relationships,
+            'sortColumn' => $request->get('sort'),
+            'sortDirection' => $request->get('direction', 'asc'),
+            'title' => Str::title(class_basename($modelClass)),
+        ];
+
         // Handle missing table case
         if (isset($relationships['error']) && $relationships['error'] === 'table_not_found') {
-            $viewData = [
-                'model' => $modelClass,
-                'modelName' => Str::title(Str::snake(class_basename($modelClass), ' ')),
-                'error' => 'table_not_found',
-                'table' => $relationships['table'],
-                'models' => $this->modelDiscovery->getModels(),
-                'modelMap' => $this->modelDiscovery->getModelMap(),
-                'title' => Str::title(class_basename($modelClass)),
-            ];
+            $viewData['error'] = 'table_not_found';
+            $viewData['table'] = $relationships['table'];
 
             if ($request->get('partial')) {
                 return View::make('modelplus::show-partial', $viewData);
@@ -73,7 +77,27 @@ final class ModelPlusController extends Controller
         if ($request->has('sort')) {
             $sortColumn = $request->get('sort');
             $sortDirection = $request->get('direction', 'asc');
-            $query->orderBy($sortColumn, $sortDirection);
+            
+            // Check if the column is a relationship
+            if (isset($relationships['foreign_keys'][$sortColumn])) {
+                $relationMethod = $relationships['foreign_keys'][$sortColumn];
+                
+                // Create a temporary model instance to get the relationship
+                $tempModel = new $modelClass();
+                $relation = $tempModel->{$relationMethod}();
+                
+                $relatedModel = $relation->getRelated();
+                $relatedTable = $relatedModel->getTable();
+                $localKey = $relation->getQualifiedForeignKeyName();
+                
+                // Join the related table and sort by its display column
+                $displayColumn = $this->modelDiscovery->getDisplayColumnForModel($relatedModel);
+                $query->join($relatedTable, $localKey, '=', $relatedTable . '.id')
+                      ->orderBy($relatedTable . '.' . $displayColumn, $sortDirection)
+                      ->select($tempModel->getTable() . '.*');
+            } else {
+                $query->orderBy($sortColumn, $sortDirection);
+            }
         }
 
         // Detect and eager load relationships
@@ -81,25 +105,9 @@ final class ModelPlusController extends Controller
             $query->with(array_keys($relationships['methods']));
         }
 
-        $records = $query->paginate(
+        $viewData['records'] = $query->paginate(
             Config::get('modelplus.pagination.per_page', 15)
-        )->withQueryString(); // Important: Keep sort parameters in pagination links
-
-        $viewData = [
-            'model' => $modelClass,
-            'modelName' => Str::title(Str::snake(class_basename($modelClass), ' ')),
-            'records' => $records,
-            'models' => $this->modelDiscovery->getModels(),
-            'modelMap' => $this->modelDiscovery->getModelMap(),
-            'title' => Str::title(class_basename($modelClass)),
-            'relationships' => $relationships,
-            'sortColumn' => $request->get('sort'),
-            'sortDirection' => $request->get('direction', 'asc'),
-        ];
-
-        if ($request->get('partial') && $request->ajax()) {
-            return View::make('modelplus::partials.table-rows', $viewData);
-        }
+        )->withQueryString();
 
         if ($request->get('partial')) {
             return View::make('modelplus::show-partial', $viewData);
