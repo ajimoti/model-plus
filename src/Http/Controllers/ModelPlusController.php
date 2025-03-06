@@ -38,6 +38,28 @@ final class ModelPlusController extends Controller
             abort(404, 'Model not found');
         }
 
+        // Get relationships first to check for table existence
+        $relationships = $this->modelDiscovery->getModelRelationships($modelClass);
+
+        // Handle missing table case
+        if (isset($relationships['error']) && $relationships['error'] === 'table_not_found') {
+            $viewData = [
+                'model' => $modelClass,
+                'modelName' => Str::title(Str::snake(class_basename($modelClass), ' ')),
+                'error' => 'table_not_found',
+                'table' => $relationships['table'],
+                'models' => $this->modelDiscovery->getModels(),
+                'modelMap' => $this->modelDiscovery->getModelMap(),
+                'title' => Str::title(class_basename($modelClass)),
+            ];
+
+            if ($request->get('partial')) {
+                return View::make('modelplus::show-partial', $viewData);
+            }
+
+            return View::make('modelplus::show', $viewData);
+        }
+
         $query = $modelClass::query();
         
         if ($request->has('search')) {
@@ -46,8 +68,6 @@ final class ModelPlusController extends Controller
         }
 
         // Detect and eager load relationships
-        $relationships = $this->modelDiscovery->getModelRelationships($modelClass);
-
         if (!empty($relationships['methods'])) {
             $query->with(array_keys($relationships['methods']));
         }

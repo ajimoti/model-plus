@@ -50,6 +50,14 @@ final class ModelDiscoveryService
 
     public function getModelRelationships(string $modelClass): array
     {
+        // First check if table exists
+        if (!$this->tableExists($modelClass)) {
+            return [
+                'error' => 'table_not_found',
+                'table' => (new $modelClass)->getTable()
+            ];
+        }
+
         $relationships = [];
         $reflection = new ReflectionClass($modelClass);
         
@@ -201,5 +209,17 @@ final class ModelDiscoveryService
         }
 
         return $mapping;
+    }
+
+    private function tableExists(string $modelClass): bool
+    {
+        try {
+            $model = new $modelClass;
+            return $model->getConnection()
+                ->getSchemaBuilder()
+                ->hasTable($model->getTable());
+        } catch (\Throwable) {
+            return false;
+        }
     }
 } 
