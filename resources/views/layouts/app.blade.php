@@ -99,6 +99,55 @@
             const queryString = window.location.search.substring(1);
             this.loadModel(initialModel, queryString);
         }
+    },
+    async sortTable(column) {
+        const direction = (this.sortColumn === column && this.sortDirection === 'asc') ? 'desc' : 'asc';
+        this.sortColumn = column;
+        this.sortDirection = direction;
+        
+        // Show loading state only for table body
+        const tableBody = document.getElementById('table-body');
+        tableBody.style.opacity = '0.5';
+        
+        const url = `{{ route('modelplus.show', ['model' => ':slug']) }}`.replace(':slug', this.currentModel);
+        const urlObj = new URL(url, window.location.origin);
+        
+        urlObj.searchParams.append('partial', 'true');
+        urlObj.searchParams.append('sort', column);
+        urlObj.searchParams.append('direction', direction);
+        
+        if (this.searchQuery) {
+            urlObj.searchParams.append('search', this.searchQuery);
+        }
+        
+        try {
+            const response = await fetch(urlObj.toString());
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const html = await response.text();
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            
+            // Update only the table body and pagination
+            const newTableBody = temp.querySelector('#table-body');
+            const newPagination = temp.querySelector('#pagination');
+            
+            if (newTableBody) {
+                tableBody.innerHTML = newTableBody.innerHTML;
+            }
+            
+            if (newPagination) {
+                document.getElementById('pagination').innerHTML = newPagination.innerHTML;
+            }
+            
+            // Update URL without page refresh
+            urlObj.searchParams.delete('partial');
+            window.history.pushState({}, '', urlObj.toString());
+        } catch (error) {
+            console.error('Error sorting table:', error);
+        } finally {
+            tableBody.style.opacity = '1';
+        }
     }
 }">
     @php
@@ -185,7 +234,6 @@
                                     <li>
                                         <a href="#" 
                                            @click.prevent="loadModel('{{ $modelMap[$m] ?? '' }}')"
-                                           {{-- class="{{ isset($model) && $m === $model ? 'bg-gray-50 text-indigo-600' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50' }} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"> --}}
                                            :class="currentModel === '{{ $modelMap[$m] ?? '' }}' ? 'bg-gray-50 text-indigo-600 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold' : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'">
                                             <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />

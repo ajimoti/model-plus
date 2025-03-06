@@ -97,7 +97,10 @@ final class ModelPlusController extends Controller
             'sortDirection' => $request->get('direction', 'asc'),
         ];
 
-        // Return only the content portion for AJAX requests
+        if ($request->get('partial') && $request->ajax()) {
+            return View::make('modelplus::partials.table-rows', $viewData);
+        }
+
         if ($request->get('partial')) {
             return View::make('modelplus::show-partial', $viewData);
         }
