@@ -222,4 +222,82 @@ final class ModelDiscoveryService
             return false;
         }
     }
+
+    public function getDisplayColumnForModel(Model $model): ?string
+    {
+        // Core identifying patterns in order of preference
+        $searchPatterns = [
+            'name',      // Will match: name, full_name, first_name, last_name, display_name, etc.
+            'title',     // Will match: title, post_title, job_title, etc.
+            'label',     // Will match: label, menu_label, etc.
+            'heading',   // Will match: heading, sub_heading, etc.
+            'subject',   // Will match: subject, email_subject, etc.
+            'code',      // Will match: code, product_code, reference_code, etc.
+            'number',    // Will match: number, phone_number, order_number, etc.
+            'email',     // Will match: email, email_address, etc.
+            'username',  // Will match: username, user_name, etc.
+            'handle',    // Will match: handle, twitter_handle, etc.
+            'slug',      // Will match: slug, url_slug, etc.
+            'sku',       // Will match: sku, product_sku, etc.
+            'city',      // Will match: city, city_name, etc.
+            'country',   // Will match: country, country_name, etc.
+            'description', // Will match: description, short_description, etc.
+            'identifier' // Will match: identifier, unique_identifier, etc.
+        ];
+
+        // Columns we should skip
+        $excludedColumns = [
+            'id', 'uuid', 'guid', 'password', 'remember_token', 'email_verified_at',
+            'created_at', 'updated_at', 'deleted_at', 'meta', 'settings', 'preferences',
+            'data', 'attributes', 'properties', 'token', 'hash', 'key', 'secret'
+        ];
+
+        $columns = $model->getConnection()
+            ->getSchemaBuilder()
+            ->getColumnListing($model->getTable());
+
+        // First pass: Look for columns containing our preferred patterns
+        foreach ($searchPatterns as $pattern) {
+            $matchingColumns = array_filter($columns, function($column) use ($pattern, $excludedColumns) {
+                // Skip excluded columns
+                if (in_array($column, $excludedColumns)) {
+                    return false;
+                }
+                
+                // Check if the column contains our search pattern
+                return str_contains(strtolower($column), $pattern);
+            });
+
+            if (!empty($matchingColumns)) {
+                // Get the first matching column that's a string type
+                foreach ($matchingColumns as $column) {
+                    $type = $model->getConnection()
+                        ->getSchemaBuilder()
+                        ->getColumnType($model->getTable(), $column);
+
+                    if (in_array($type, ['string', 'text', 'char', 'varchar'])) {
+                        return $column;
+                    }
+                }
+            }
+        }
+
+        // Second pass: Fall back to any string column not in excluded list
+        foreach ($columns as $column) {
+            if (in_array($column, $excludedColumns)) {
+                continue;
+            }
+
+            $type = $model->getConnection()
+                ->getSchemaBuilder()
+                ->getColumnType($model->getTable(), $column);
+
+            if (in_array($type, ['string', 'text', 'char', 'varchar'])) {
+                return $column;
+            }
+        }
+
+        // Last resort: Return null if no suitable column found
+        return null;
+    }
 } 

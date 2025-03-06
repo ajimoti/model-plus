@@ -91,14 +91,12 @@
                                                         @php
                                                             $relationMethod = $relationships['foreign_keys'][$column];
                                                             $relatedRecord = $record->{$relationMethod};
-                                                            $displayColumn = $relatedRecord ? 
-                                                                collect($relatedRecord->getAttributes())
-                                                                    ->filter(fn($val, $key) => 
-                                                                        in_array(gettype($val), ['string']) && 
-                                                                        !in_array($key, ['password', 'remember_token'])
-                                                                    )
-                                                                    ->keys()
-                                                                    ->first() : null;
+                                                            $displayColumn = null;
+                                                            
+                                                            if ($relatedRecord) {
+                                                                $displayColumn = app(Vendor\ModelPlus\Services\ModelDiscoveryService::class)
+                                                                    ->getDisplayColumnForModel($relatedRecord);
+                                                            }
                                                         @endphp
                                                         @if($relatedRecord && $displayColumn)
                                                             <a href="#" 
