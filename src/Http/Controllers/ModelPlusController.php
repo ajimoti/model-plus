@@ -46,11 +46,10 @@ final class ModelPlusController extends Controller
         }
 
         // Detect and eager load relationships
-        $modelInstance = new $modelClass;
         $relationships = $this->modelDiscovery->getModelRelationships($modelClass);
 
-        if (!empty($relationships)) {
-            $query->with(array_keys($relationships));
+        if (!empty($relationships['methods'])) {
+            $query->with(array_keys($relationships['methods']));
         }
 
         $records = $query->paginate(

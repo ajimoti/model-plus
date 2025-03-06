@@ -78,7 +78,19 @@ final class ModelDiscoveryService
             }
         }
 
-        return $relationships;
+        // Map foreign keys to relationship methods
+        $foreignKeyMap = $this->mapForeignKeyToRelationship($modelClass, $relationships);
+        
+        // Add the mapping to the relationships array
+        foreach ($relationships as $method => &$info) {
+            $info['foreign_key'] = array_search($method, $foreignKeyMap) ?: null;
+        }
+
+        // Add inverse mapping for easy lookup
+        return [
+            'methods' => $relationships,
+            'foreign_keys' => $foreignKeyMap
+        ];
     }
 
     private function buildModelMap(): array
@@ -159,5 +171,35 @@ final class ModelDiscoveryService
         }
 
         return null;
+    }
+
+    private function mapForeignKeyToRelationship(string $modelClass, array $relationships): array
+    {
+        $mapping = [];
+        $reflection = new ReflectionClass($modelClass);
+        $instance = new $modelClass;
+
+        foreach ($relationships as $methodName => $info) {
+            try {
+                $method = $reflection->getMethod($methodName);
+                $relation = $instance->{$methodName}();
+                
+                // Get the foreign key from the relation
+                $foreignKey = match (true) {
+                    $relation instanceof \Illuminate\Database\Eloquent\Relations\BelongsTo => $relation->getForeignKeyName(),
+                    $relation instanceof \Illuminate\Database\Eloquent\Relations\HasOne => $relation->getForeignKeyName(),
+                    $relation instanceof \Illuminate\Database\Eloquent\Relations\HasMany => $relation->getForeignKeyName(),
+                    default => null
+                };
+
+                if ($foreignKey) {
+                    $mapping[$foreignKey] = $methodName;
+                }
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        return $mapping;
     }
 } 

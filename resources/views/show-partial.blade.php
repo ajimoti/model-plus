@@ -30,8 +30,12 @@
                                     @foreach($records->first()?->getAttributes() ?? [] as $column => $value)
                                         <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                                             {{ Str::title(str_replace('_', ' ', $column)) }}
-                                            @if(Str::endsWith($column, '_id') && isset($relationships[Str::beforeLast($column, '_id')]))
-                                                <span class="ml-1 text-xs text-gray-500">({{ $relationships[Str::beforeLast($column, '_id')]['type'] }})</span>
+                                            @if(isset($relationships['foreign_keys'][$column]))
+                                                @php
+                                                    $relationMethod = $relationships['foreign_keys'][$column];
+                                                    $relationType = $relationships['methods'][$relationMethod]['type'];
+                                                @endphp
+                                                <span class="ml-1 text-xs text-gray-500">({{ $relationType }})</span>
                                             @endif
                                         </th>
                                     @endforeach
@@ -45,10 +49,10 @@
                                     <tr>
                                         @foreach($record->getAttributes() as $column => $value)
                                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                @if(Str::endsWith($column, '_id') && isset($relationships[Str::beforeLast($column, '_id')]))
+                                                @if(isset($relationships['foreign_keys'][$column]))
                                                     @php
-                                                        $relationName = Str::beforeLast($column, '_id');
-                                                        $relatedRecord = $record->{$relationName};
+                                                        $relationMethod = $relationships['foreign_keys'][$column];
+                                                        $relatedRecord = $record->{$relationMethod};
                                                         $displayColumn = $relatedRecord ? 
                                                             collect($relatedRecord->getAttributes())
                                                                 ->filter(fn($val, $key) => 
