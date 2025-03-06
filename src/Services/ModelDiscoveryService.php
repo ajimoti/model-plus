@@ -41,7 +41,7 @@ final class ModelDiscoveryService
             fn() => $this->buildModelMap()
         );
     }
-
+// {!!  !!}
     public function resolveModelClass(string $slug): ?string
     {
         $map = $this->getModelMap();

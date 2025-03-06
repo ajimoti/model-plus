@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Abort;
 use Illuminate\View\View as ViewResponse;
 use Illuminate\Support\Facades\App;
 use Vendor\ModelPlus\Services\ModelDiscoveryService;
+// use Illuminate\Support\Facades\Request;
 
 final class ModelPlusController extends Controller
 {
@@ -62,9 +63,17 @@ final class ModelPlusController extends Controller
 
         $query = $modelClass::query();
         
+        // Handle search
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
             // Implementation depends on your requirements
+        }
+
+        // Handle sorting
+        if ($request->has('sort')) {
+            $sortColumn = $request->get('sort');
+            $sortDirection = $request->get('direction', 'asc');
+            $query->orderBy($sortColumn, $sortDirection);
         }
 
         // Detect and eager load relationships
@@ -74,7 +83,7 @@ final class ModelPlusController extends Controller
 
         $records = $query->paginate(
             Config::get('modelplus.pagination.per_page', 15)
-        );
+        )->withQueryString(); // Important: Keep sort parameters in pagination links
 
         $viewData = [
             'model' => $modelClass,
@@ -84,6 +93,8 @@ final class ModelPlusController extends Controller
             'modelMap' => $this->modelDiscovery->getModelMap(),
             'title' => Str::title(class_basename($modelClass)),
             'relationships' => $relationships,
+            'sortColumn' => $request->get('sort'),
+            'sortDirection' => $request->get('direction', 'asc'),
         ];
 
         // Return only the content portion for AJAX requests

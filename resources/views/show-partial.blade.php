@@ -1,3 +1,29 @@
+@php
+    function getSortIcon($column, $currentSort, $currentDirection) {
+        if ($currentSort !== $column) {
+            return <<<HTML
+                <svg class="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+HTML;
+        }
+        
+        if ($currentDirection === 'asc') {
+            return <<<HTML
+                <svg class="w-3 h-3 ml-1.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                </svg>
+HTML;
+        }
+        
+        return <<<HTML
+            <svg class="w-3 h-3 ml-1.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+HTML;
+    }
+@endphp
+
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
         <h1 class="text-base font-semibold leading-6 text-gray-900">{{ $modelName }}</h1>
@@ -67,14 +93,19 @@
                                     <tr>
                                         @foreach($records->first()?->getAttributes() ?? [] as $column => $value)
                                             <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                                {{ Str::title(str_replace('_', ' ', $column)) }}
-                                                @if(isset($relationships['foreign_keys'][$column]))
-                                                    @php
-                                                        $relationMethod = $relationships['foreign_keys'][$column];
-                                                        $relationType = $relationships['methods'][$relationMethod]['type'];
-                                                    @endphp
-                                                    <span class="ml-1 text-xs text-gray-500">({{ $relationType }})</span>
-                                                @endif
+                                                <button type="button" 
+                                                        @click.prevent="loadModel('{{ $modelMap[$model] ?? '' }}', 'sort={{ $column }}&direction={{ ($sortColumn === $column && $sortDirection === 'asc') ? 'desc' : 'asc' }}')"
+                                                        class="group inline-flex items-center">
+                                                    {{ Str::title(str_replace('_', ' ', $column)) }}
+                                                    @if(isset($relationships['foreign_keys'][$column]))
+                                                        @php
+                                                            $relationMethod = $relationships['foreign_keys'][$column];
+                                                            $relationType = $relationships['methods'][$relationMethod]['type'];
+                                                        @endphp
+                                                        <span class="ml-1 text-xs text-gray-500">({{ $relationType }})</span>
+                                                    @endif
+                                                    {!! getSortIcon($column, $sortColumn, $sortDirection) !!}
+                                                </button>
                                             </th>
                                         @endforeach
                                         <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">

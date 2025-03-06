@@ -31,6 +31,8 @@
     loading: false,
     content: '',
     searchQuery: '',
+    sortColumn: null,
+    sortDirection: 'asc',
     async loadModel(modelSlug, queryParams = null) {
         if (this.loading) return;
         
@@ -48,14 +50,22 @@
             urlObj.searchParams.append('search', this.searchQuery);
         }
         
-        // Add pagination params if present
+        // Add sort parameters if present in queryParams
         if (queryParams) {
             if (typeof queryParams === 'string') {
                 const params = new URLSearchParams(queryParams);
+                if (params.has('sort')) {
+                    this.sortColumn = params.get('sort');
+                    this.sortDirection = params.get('direction') || 'asc';
+                }
                 params.forEach((value, key) => {
                     urlObj.searchParams.append(key, value);
                 });
             }
+        } else if (this.sortColumn) {
+            // Maintain sort state when searching
+            urlObj.searchParams.append('sort', this.sortColumn);
+            urlObj.searchParams.append('direction', this.sortDirection);
         }
         
         try {
@@ -63,7 +73,7 @@
             if (!response.ok) throw new Error('Network response was not ok');
             
             const html = await response.text();
-            this.content = html; // This will update the content
+            this.content = html;
             this.currentModel = modelSlug;
             
             // Update URL without page refresh (exclude 'partial' from visible URL)
