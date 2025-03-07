@@ -19,6 +19,7 @@ final class ModelDiscoveryService
 {
     private const CACHE_KEY = 'modelplus.discovered_models';
     private const MODEL_MAP_CACHE_KEY = 'modelplus.model_map';
+    private const DISPLAY_COLUMN_CACHE_KEY = 'modelplus.display_columns';
 
     public function __construct(
         private readonly array $modelPaths
@@ -41,7 +42,7 @@ final class ModelDiscoveryService
             fn() => $this->buildModelMap()
         );
     }
-// {!!  !!}
+
     public function resolveModelClass(string $slug): ?string
     {
         $map = $this->getModelMap();
@@ -50,7 +51,6 @@ final class ModelDiscoveryService
 
     public function getModelRelationships(string $modelClass): array
     {
-        // First check if table exists
         if (!$this->tableExists($modelClass)) {
             return [
                 'error' => 'table_not_found',
@@ -86,15 +86,12 @@ final class ModelDiscoveryService
             }
         }
 
-        // Map foreign keys to relationship methods
         $foreignKeyMap = $this->mapForeignKeyToRelationship($modelClass, $relationships);
         
-        // Add the mapping to the relationships array
         foreach ($relationships as $method => &$info) {
             $info['foreign_key'] = array_search($method, $foreignKeyMap) ?: null;
         }
 
-        // Add inverse mapping for easy lookup
         return [
             'methods' => $relationships,
             'foreign_keys' => $foreignKeyMap
@@ -192,7 +189,6 @@ final class ModelDiscoveryService
                 $method = $reflection->getMethod($methodName);
                 $relation = $instance->{$methodName}();
                 
-                // Get the foreign key from the relation
                 $foreignKey = match (true) {
                     $relation instanceof \Illuminate\Database\Eloquent\Relations\BelongsTo => $relation->getForeignKeyName(),
                     $relation instanceof \Illuminate\Database\Eloquent\Relations\HasOne => $relation->getForeignKeyName(),
@@ -224,6 +220,17 @@ final class ModelDiscoveryService
     }
 
     public function getDisplayColumnForModel(Model $model): ?string
+    {
+        $modelClass = get_class($model);
+        
+        return Cache::remember(
+            self::DISPLAY_COLUMN_CACHE_KEY . '.' . $modelClass,
+            Carbon::now()->addHour(),
+            fn() => $this->findDisplayColumn($model)
+        );
+    }
+
+    private function findDisplayColumn(Model $model): ?string
     {
         // Core identifying patterns in order of preference
         $searchPatterns = [

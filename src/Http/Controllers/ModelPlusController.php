@@ -103,6 +103,14 @@ final class ModelPlusController extends Controller
         // Detect and eager load relationships
         if (!empty($relationships['methods'])) {
             $query->with(array_keys($relationships['methods']));
+            
+            // Pre-cache display columns for related models
+            foreach ($relationships['methods'] as $relation => $info) {
+                $relatedModel = $query->first()?->$relation;
+                if ($relatedModel) {
+                    $this->modelDiscovery->getDisplayColumnForModel($relatedModel);
+                }
+            }
         }
 
         $viewData['records'] = $query->paginate(
