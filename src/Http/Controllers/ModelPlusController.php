@@ -38,7 +38,7 @@ final class ModelPlusController extends Controller
         if (!$modelClass || !class_exists($modelClass)) {
             abort(404, 'Model not found');
         }
-
+        
         // Get relationships first to check for table existence
         $relationships = $this->modelDiscovery->getModelRelationships($modelClass);
 
@@ -101,21 +101,35 @@ final class ModelPlusController extends Controller
         }
 
         // Detect and eager load relationships
-        if (!empty($relationships['methods'])) {
-            $query->with(array_keys($relationships['methods']));
+        if (! empty($relationships['methods'])) {
+            // at this point, let's only eager load the relationships that are belongsTo
+            $belongsToRelationships = array_filter($relationships['methods'], function($method) {
+                return $method['type'] === 'BelongsTo';
+            });
+            
+            $query->with(array_keys($belongsToRelationships));
             
             // Pre-cache display columns for related models
-            foreach ($relationships['methods'] as $relation => $info) {
-                $relatedModel = $query->first()?->$relation;
-                if ($relatedModel) {
-                    $this->modelDiscovery->getDisplayColumnForModel($relatedModel);
-                }
-            }
-        }
+            // foreach ($relationships['methods'] as $relation => $info) {
+            //     if ($info['type'] !== 'belongsTo') {
+            //         continue;
+            //     }
 
-        $viewData['records'] = $query->paginate(
-            Config::get('modelplus.pagination.per_page', 15)
-        )->withQueryString();
+            //     $relatedModel = $query->first()?->$relation;
+            //     if ($relatedModel) {
+            //         $this->modelDiscovery->getDisplayColumnForModel($relatedModel);
+            //     }
+            // }
+        }
+        try {
+
+            $viewData['records'] = $query->paginate(
+                Config::get('modelplus.pagination.per_page', 15)
+            )->withQueryString();
+        }
+        catch (\Exception $e) {
+            dd($e, $query->getQuery(), $query->getBindings(), $query->toRawSql());
+        }
 
         if ($request->get('partial')) {
             return View::make('modelplus::show-partial', $viewData);

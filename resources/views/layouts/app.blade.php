@@ -103,8 +103,8 @@
     loading: false,
     content: '',
     searchQuery: '',
-    sortColumn: null,
-    sortDirection: 'asc',
+    modelFilters: {},
+    
     async loadModel(modelSlug, queryParams = null) {
         if (this.loading) return;
         
@@ -122,22 +122,28 @@
             urlObj.searchParams.append('search', this.searchQuery);
         }
         
-        // Add sort parameters if present in queryParams
-        if (queryParams) {
-            if (typeof queryParams === 'string') {
-                const params = new URLSearchParams(queryParams);
-                if (params.has('sort')) {
-                    this.sortColumn = params.get('sort');
-                    this.sortDirection = params.get('direction') || 'asc';
-                }
-                params.forEach((value, key) => {
-                    urlObj.searchParams.append(key, value);
-                });
+        // If we have stored filters for this model, use them
+        if (this.modelFilters[modelSlug]) {
+            const filters = this.modelFilters[modelSlug];
+            if (filters.sort) {
+                urlObj.searchParams.append('sort', filters.sort);
+                urlObj.searchParams.append('direction', filters.direction || 'asc');
             }
-        } else if (this.sortColumn) {
-            // Maintain sort state when searching
-            urlObj.searchParams.append('sort', this.sortColumn);
-            urlObj.searchParams.append('direction', this.sortDirection);
+        }
+        
+        // If new query params are provided, update the stored filters
+        if (queryParams) {
+            const params = new URLSearchParams(queryParams);
+            if (params.has('sort')) {
+                this.modelFilters[modelSlug] = {
+                    sort: params.get('sort'),
+                    direction: params.get('direction') || 'asc'
+                };
+            }
+            // Add the new params to the URL
+            params.forEach((value, key) => {
+                urlObj.searchParams.set(key, value);
+            });
         }
         
         try {

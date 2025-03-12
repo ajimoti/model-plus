@@ -16,6 +16,18 @@
         url.searchParams.set('direction', this.sortDirection);
         url.searchParams.set('partial', true);
         
+        // Store the sort state in the parent's modelFilters
+        const modelSlug = '{{ $modelMap[$model] ?? '' }}';
+        if (window.Alpine) {
+            const parentComponent = window.Alpine.$data(document.querySelector('[x-data]'));
+            if (parentComponent && parentComponent.modelFilters) {
+                parentComponent.modelFilters[modelSlug] = {
+                    sort: column,
+                    direction: this.sortDirection
+                };
+            }
+        }
+        
         fetch(url)
             .then(response => response.text())
             .then(html => {

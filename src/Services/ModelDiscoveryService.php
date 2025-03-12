@@ -87,7 +87,7 @@ final class ModelDiscoveryService
         }
 
         $foreignKeyMap = $this->mapForeignKeyToRelationship($modelClass, $relationships);
-        
+
         foreach ($relationships as $method => &$info) {
             $info['foreign_key'] = array_search($method, $foreignKeyMap) ?: null;
         }
