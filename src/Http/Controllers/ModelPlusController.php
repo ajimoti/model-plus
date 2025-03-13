@@ -44,13 +44,17 @@ final class ModelPlusController extends Controller
 
         $viewData = [
             'model' => $modelClass,
-            'modelName' => Str::title(str_replace('_', ' ', class_basename($modelClass))),
+            'modelName' => Str::title(
+                preg_replace('/(?<!^)[A-Z]/', ' $0', class_basename($modelClass))
+            ),
             'models' => $this->modelDiscovery->getModels(),
             'modelMap' => $this->modelDiscovery->getModelMap(),
             'relationships' => $relationships,
             'sortColumn' => $request->get('sort'),
             'sortDirection' => $request->get('direction', 'asc'),
-            'title' => Str::title(class_basename($modelClass)),
+            'title' => Str::title(
+                preg_replace('/(?<!^)[A-Z]/', ' $0', class_basename($modelClass))
+            ),
         ];
 
         // Handle missing table case
@@ -121,16 +125,11 @@ final class ModelPlusController extends Controller
             //     }
             // }
         }
-        try {
 
-            $viewData['records'] = $query->paginate(
-                Config::get('modelplus.pagination.per_page', 15)
-            )->withQueryString();
-        }
-        catch (\Exception $e) {
-            dd($e, $query->getQuery(), $query->getBindings(), $query->toRawSql());
-        }
-
+        $viewData['records'] = $query->paginate(
+            Config::get('modelplus.pagination.per_page', 15)
+        )->withQueryString();
+        
         if ($request->get('partial')) {
             return View::make('modelplus::show-partial', $viewData);
         }

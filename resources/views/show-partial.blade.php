@@ -68,16 +68,16 @@
 <div class="sm:flex sm:items-center">
     <div class="sm:flex-auto">
         <h1 class="text-base font-semibold leading-6 text-gray-900">
-            {{ Str::title(str_replace('_', ' ', class_basename($model))) }}
+            {{ $modelName }}
         </h1>
         <p class="mt-2 text-sm text-gray-700">
-            A list of all {{ Str::lower(str_replace('_', ' ', class_basename($model))) }} records in your database.
+            A list of all {{ Str::lower($modelName) }} records in your database.
         </p>
     </div>
     @if(!isset($error))
     <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
         <button type="button" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Add {{ Str::title(str_replace('_', ' ', class_basename($model))) }}
+            Add {{ $modelName }}
         </button>
     </div>
     @endif
@@ -126,7 +126,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 <h3 class="mt-2 text-sm font-semibold text-gray-900">No records found</h3>
-                <p class="mt-1 text-sm text-gray-500">Get started by creating a new {{ strtolower(class_basename($model)) }}.</p>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new {{ strtolower($modelName) }}.</p>
             </div>
         @else
             <div class="table-container">
