@@ -156,13 +156,13 @@
                                 @foreach($records->first()?->getAttributes() ?? [] as $column => $value)
                                     <th scope="col" 
                                         @class([
-                                            'py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6',
+                                            'py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 max-w-xs',
                                             'sticky-col' => $loop->first
                                         ])>
                                         <button type="button" 
                                                 @click.prevent="sortTable('{{ $column }}')"
                                                 class="group inline-flex items-center">
-                                            {{ Str::title(str_replace('_', ' ', $column)) }}
+                                            <span class="truncate">{{ Str::title(str_replace('_', ' ', $column)) }}</span>
                                             @if(isset($relationships['foreign_keys'][$column]))
                                                 @php
                                                     $relationMethod = $relationships['foreign_keys'][$column];
@@ -193,11 +193,11 @@
                                             ])
                                         @else
                                             <td @class([
-                                                'whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6',
+                                                'whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 max-w-xs',
                                                 'sticky-col' => $loop->first,
                                                 'bg-white' => true
                                             ])>
-                                                {{ $value }}
+                                                <div class="truncate" title="{{ $value }}">{{ $value }}</div>
                                             </td>
                                         @endif
                                     @endforeach
