@@ -106,7 +106,43 @@
             opacity: 0;
             transform: translateY(4px);
         }
+        
+        /* Hover card styles */
+        .hover-card {
+            --shadow-color: rgb(0 0 0 / 0.1);
+            box-shadow: 
+                0 4px 6px -1px var(--shadow-color),
+                0 2px 4px -2px var(--shadow-color);
+        }
+        
+        /* Custom scrollbar for hover card */
+        .hover-card-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        
+        .hover-card-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .hover-card-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .hover-card-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 3px;
+        }
+        
+        .hover-card-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.7);
+        }
     </style>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            console.log('Alpine.js initialized'); // Debug log
+        });
+    </script>
 </head>
 <body class="h-full" x-data="{ 
     sidebarOpen: false,

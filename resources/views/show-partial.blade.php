@@ -264,43 +264,74 @@
         Alpine.data('relationHoverCard', () => ({
             isVisible: false,
             currentId: null,
-            position: 'bottom',
             hideTimer: null,
-
-            async showCard(event, model, id) {
-                // Calculate position
-                const rect = event.target.getBoundingClientRect();
-                const spaceBelow = window.innerHeight - rect.bottom;
-                this.position = spaceBelow < 400 ? 'top' : 'bottom';
-
-                // Show card
+            cardPosition: {},
+            
+            showCard(event, model, id) {
+                // Clear any existing hide timer
+                this.cancelHideTimer();
+                
+                // Calculate position using the event target
+                const rect = event.target.closest('a').getBoundingClientRect();
+                const cardWidth = 384; // w-96 = 24rem = 384px
+                const cardHeight = Math.min(window.innerHeight * 0.8, 400);
+                
+                // Calculate available space
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Default to showing below and to the right
+                let left = rect.left;
+                let top = rect.bottom + 8;
+                
+                // Check if card would overflow right edge
+                if (left + cardWidth > viewportWidth) {
+                    left = Math.max(8, viewportWidth - cardWidth - 8);
+                }
+                
+                // Check if card would overflow bottom edge
+                if (top + cardHeight > viewportHeight) {
+                    // Show above instead
+                    top = Math.max(8, rect.top - cardHeight - 8);
+                }
+                
+                // Update position and show card
+                this.cardPosition = {
+                    position: 'fixed',
+                    top: `${top}px`,
+                    left: `${left}px`,
+                    maxHeight: `${cardHeight}px`,
+                    width: `${cardWidth}px`
+                };
+                
+                // Show the card
                 this.currentId = id;
                 this.isVisible = true;
-                
-                // Cancel any pending hide timer
-                this.cancelHideTimer();
             },
-
+            
             startHideTimer() {
+                if (this.hideTimer) return;
+                
                 this.hideTimer = setTimeout(() => {
                     this.hideCard();
-                }, 300); // 300ms delay before hiding
+                }, 200);
             },
-
+            
             cancelHideTimer() {
                 if (this.hideTimer) {
                     clearTimeout(this.hideTimer);
                     this.hideTimer = null;
                 }
             },
-
+            
             hideCard() {
                 this.isVisible = false;
                 this.currentId = null;
+                this.hideTimer = null;
             },
-
+            
             viewDetails(model, id) {
-                // You can implement the view details action here
+                this.hideCard();
                 this.$dispatch('view-record', { model, id });
             }
         }));
