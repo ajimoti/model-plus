@@ -283,26 +283,53 @@
                     const viewportWidth = window.innerWidth;
                     const viewportHeight = window.innerHeight;
                     
-                    let left = rect.left;
-                    let top = rect.bottom + 8;
+                    // Get table scroll container
+                    const tableContainer = event.target.closest('.table-scroll-container');
+                    const tableRect = tableContainer.getBoundingClientRect();
                     
-                    if (left + cardWidth > viewportWidth) {
-                        left = Math.max(8, viewportWidth - cardWidth - 8);
+                    // Calculate available space in different directions
+                    const spaceAbove = rect.top - Math.max(navHeight, tableRect.top);
+                    const spaceBelow = Math.min(viewportHeight, tableRect.bottom) - rect.bottom;
+                    const spaceRight = viewportWidth - rect.right;
+                    const spaceLeft = rect.left;
+                    
+                    // Determine horizontal position
+                    let left;
+                    if (spaceRight >= cardWidth + 8) {
+                        // Prefer right if there's enough space
+                        left = rect.right + 8;
+                    } else if (spaceLeft >= cardWidth + 8) {
+                        // Try left if there's enough space
+                        left = rect.left - cardWidth - 8;
+                    } else {
+                        // Align with the link's left edge, but ensure it stays within viewport
+                        left = Math.max(8, Math.min(viewportWidth - cardWidth - 8, rect.left));
                     }
                     
-                    if (rect.top < navHeight) {
-                        top = Math.max(navHeight + 8, rect.bottom + 8);
-                    } else if (top + cardHeight > viewportHeight) {
-                        top = Math.max(navHeight + 8, rect.top - cardHeight - 8);
+                    // Determine vertical position
+                    let top;
+                    if (spaceBelow >= cardHeight + 8) {
+                        // Prefer below the link if there's space
+                        top = rect.bottom + 8;
+                    } else if (spaceAbove >= cardHeight + 8) {
+                        // Try above if there's space
+                        top = rect.top - cardHeight - 8;
+                    } else {
+                        // Position relative to the table container
+                        if (rect.top < tableRect.top + (tableRect.height / 2)) {
+                            // Link is in upper half of table - align with top of table
+                            top = tableRect.top + 8;
+                        } else {
+                            // Link is in lower half - align with bottom of viewport or table
+                            top = Math.min(tableRect.bottom, viewportHeight) - cardHeight - 8;
+                        }
                     }
-                    
-                    top = Math.max(navHeight + 8, top);
                     
                     this.cardPosition = {
                         position: 'fixed',
                         top: `${top}px`,
                         left: `${left}px`,
-                        maxHeight: `${Math.min(cardHeight, viewportHeight - top - 8)}px`,
+                        maxHeight: `${cardHeight}px`,
                         width: `${cardWidth}px`
                     };
                     
