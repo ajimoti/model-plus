@@ -95,6 +95,17 @@
         .table-action-btn {
             @apply inline-flex items-center px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200;
         }
+
+        .hover-card-enter-active,
+        .hover-card-leave-active {
+            transition: all 0.2s ease;
+        }
+
+        .hover-card-enter-from,
+        .hover-card-leave-to {
+            opacity: 0;
+            transform: translateY(4px);
+        }
     </style>
 </head>
 <body class="h-full" x-data="{ 

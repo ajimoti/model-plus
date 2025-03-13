@@ -62,6 +62,25 @@
         
         // TODO: Implement delete functionality
         console.log('Delete record:', model, id);
+    },
+
+    hoverCardData: null,
+    hoverCardTimer: null,
+    
+    async fetchRelationDetails(model, id) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('action', 'fetch_relation');
+        url.searchParams.set('model', model);
+        url.searchParams.set('id', id);
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching relation details:', error);
+            return null;
+        }
     }
 }">
 
@@ -239,6 +258,50 @@
                 
                 el.classList.toggle('shadow-start', isStart);
                 el.classList.toggle('shadow-end', isEnd);
+            }
+        }));
+
+        Alpine.data('relationHoverCard', () => ({
+            isVisible: false,
+            currentId: null,
+            position: 'bottom',
+            hideTimer: null,
+
+            async showCard(event, model, id) {
+                // Calculate position
+                const rect = event.target.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                this.position = spaceBelow < 400 ? 'top' : 'bottom';
+
+                // Show card
+                this.currentId = id;
+                this.isVisible = true;
+                
+                // Cancel any pending hide timer
+                this.cancelHideTimer();
+            },
+
+            startHideTimer() {
+                this.hideTimer = setTimeout(() => {
+                    this.hideCard();
+                }, 300); // 300ms delay before hiding
+            },
+
+            cancelHideTimer() {
+                if (this.hideTimer) {
+                    clearTimeout(this.hideTimer);
+                    this.hideTimer = null;
+                }
+            },
+
+            hideCard() {
+                this.isVisible = false;
+                this.currentId = null;
+            },
+
+            viewDetails(model, id) {
+                // You can implement the view details action here
+                this.$dispatch('view-record', { model, id });
             }
         }));
     });

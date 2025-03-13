@@ -15,12 +15,11 @@
     'bg-white' => true
 ])>
     @if($relatedRecord && $displayColumn)
-        <a href="#" 
-           @click.prevent="loadModel('{{ Str::plural(Str::snake(class_basename(get_class($relatedRecord)))) }}', null)"
-           class="text-indigo-600 hover:text-indigo-900">
-            {{ $relatedRecord->{$displayColumn} }}
-            <span class="text-gray-400 text-xs">(#{{ $value }})</span>
-        </a>
+        @include('modelplus::partials.relation-hover-card', [
+            'relatedRecord' => $relatedRecord,
+            'displayColumn' => $displayColumn,
+            'value' => $value
+        ])
     @else
         <span class="text-gray-400">{{ $value ?? 'N/A' }}</span>
     @endif
