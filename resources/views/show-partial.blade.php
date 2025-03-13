@@ -265,58 +265,50 @@
             isVisible: false,
             currentId: null,
             hideTimer: null,
+            showTimer: null,
             cardPosition: {},
             
             showCard(event, model, id) {
-                // Clear any existing hide timer
                 this.cancelHideTimer();
+                this.cancelShowTimer();
                 
-                // Calculate position using the event target
-                const rect = event.target.closest('a').getBoundingClientRect();
-                const cardWidth = 384; // w-96 = 24rem = 384px
-                const cardHeight = Math.min(window.innerHeight * 0.8, 400);
-                
-                // Get the nav height and position
-                const navElement = document.querySelector('.sticky.top-0');
-                const navHeight = navElement ? navElement.offsetHeight : 0;
-                
-                // Calculate available space
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                
-                // Default to showing below and to the right
-                let left = rect.left;
-                let top = rect.bottom + 8;
-                
-                // Check if card would overflow right edge
-                if (left + cardWidth > viewportWidth) {
-                    left = Math.max(8, viewportWidth - cardWidth - 8);
-                }
-                
-                // Adjust vertical position considering the nav bar
-                if (rect.top < navHeight) {
-                    // If the trigger is above or behind nav, show below
-                    top = Math.max(navHeight + 8, rect.bottom + 8);
-                } else if (top + cardHeight > viewportHeight) {
-                    // If it would overflow bottom, show above the trigger
-                    top = Math.max(navHeight + 8, rect.top - cardHeight - 8);
-                }
-                
-                // Ensure minimum distance from nav
-                top = Math.max(navHeight + 8, top);
-                
-                // Update position and show card
-                this.cardPosition = {
-                    position: 'fixed',
-                    top: `${top}px`,
-                    left: `${left}px`,
-                    maxHeight: `${Math.min(cardHeight, viewportHeight - top - 8)}px`,
-                    width: `${cardWidth}px`
-                };
-                
-                // Show the card
-                this.currentId = id;
-                this.isVisible = true;
+                this.showTimer = setTimeout(() => {
+                    const rect = event.target.closest('a').getBoundingClientRect();
+                    const cardWidth = 384;
+                    const cardHeight = Math.min(window.innerHeight * 0.8, 400);
+                    
+                    const navElement = document.querySelector('.sticky.top-0');
+                    const navHeight = navElement ? navElement.offsetHeight : 0;
+                    
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    let left = rect.left;
+                    let top = rect.bottom + 8;
+                    
+                    if (left + cardWidth > viewportWidth) {
+                        left = Math.max(8, viewportWidth - cardWidth - 8);
+                    }
+                    
+                    if (rect.top < navHeight) {
+                        top = Math.max(navHeight + 8, rect.bottom + 8);
+                    } else if (top + cardHeight > viewportHeight) {
+                        top = Math.max(navHeight + 8, rect.top - cardHeight - 8);
+                    }
+                    
+                    top = Math.max(navHeight + 8, top);
+                    
+                    this.cardPosition = {
+                        position: 'fixed',
+                        top: `${top}px`,
+                        left: `${left}px`,
+                        maxHeight: `${Math.min(cardHeight, viewportHeight - top - 8)}px`,
+                        width: `${cardWidth}px`
+                    };
+                    
+                    this.currentId = id;
+                    this.isVisible = true;
+                }, 250);
             },
             
             startHideTimer() {
@@ -324,7 +316,14 @@
                 
                 this.hideTimer = setTimeout(() => {
                     this.hideCard();
-                }, 200);
+                }, 300);
+            },
+            
+            cancelShowTimer() {
+                if (this.showTimer) {
+                    clearTimeout(this.showTimer);
+                    this.showTimer = null;
+                }
             },
             
             cancelHideTimer() {
@@ -335,6 +334,7 @@
             },
             
             hideCard() {
+                this.cancelShowTimer();
                 this.isVisible = false;
                 this.currentId = null;
                 this.hideTimer = null;
