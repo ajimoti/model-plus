@@ -276,6 +276,10 @@
                 const cardWidth = 384; // w-96 = 24rem = 384px
                 const cardHeight = Math.min(window.innerHeight * 0.8, 400);
                 
+                // Get the nav height and position
+                const navElement = document.querySelector('.sticky.top-0');
+                const navHeight = navElement ? navElement.offsetHeight : 0;
+                
                 // Calculate available space
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
@@ -289,18 +293,24 @@
                     left = Math.max(8, viewportWidth - cardWidth - 8);
                 }
                 
-                // Check if card would overflow bottom edge
-                if (top + cardHeight > viewportHeight) {
-                    // Show above instead
-                    top = Math.max(8, rect.top - cardHeight - 8);
+                // Adjust vertical position considering the nav bar
+                if (rect.top < navHeight) {
+                    // If the trigger is above or behind nav, show below
+                    top = Math.max(navHeight + 8, rect.bottom + 8);
+                } else if (top + cardHeight > viewportHeight) {
+                    // If it would overflow bottom, show above the trigger
+                    top = Math.max(navHeight + 8, rect.top - cardHeight - 8);
                 }
+                
+                // Ensure minimum distance from nav
+                top = Math.max(navHeight + 8, top);
                 
                 // Update position and show card
                 this.cardPosition = {
                     position: 'fixed',
                     top: `${top}px`,
                     left: `${left}px`,
-                    maxHeight: `${cardHeight}px`,
+                    maxHeight: `${Math.min(cardHeight, viewportHeight - top - 8)}px`,
                     width: `${cardWidth}px`
                 };
                 

@@ -23,7 +23,7 @@
              @mouseenter="cancelHideTimer"
              @mouseleave="startHideTimer"
              :style="cardPosition"
-             class="fixed z-[100] w-96 bg-white rounded-lg shadow-xl border border-gray-200 max-h-[80vh] flex flex-col hover-card hover-card-scroll"
+             class="fixed z-[9999] w-96 bg-white rounded-lg shadow-xl border border-gray-200 max-h-[80vh] flex flex-col hover-card hover-card-scroll"
              style="display: none;">
             
             <div class="p-4 border-b border-gray-100">
