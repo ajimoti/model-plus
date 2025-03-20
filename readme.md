@@ -2,6 +2,10 @@
 
 ModelPlus is an intuitive UI package for Laravel that provides a powerful and user-friendly interface for browsing your Eloquent models. It automatically discovers your models and creates a dynamic, interactive dashboard for viewing your application's data.
 
+## Installation
+
+You can install the package via composer:
+
 ## Available Features
 
 - **Automatic Model Discovery**: Automatically scans and discovers all Eloquent models in your application
@@ -63,11 +67,11 @@ Once installed, navigate to `/modelplus` in your browser to access the dashboard
 - Navigate through related data
 - View detailed information via hover cards
 
-## Local Development
+<!-- ## Local Development
 
 For local development:
 
 1. Add this to your `composer.json`:
 
 ## For local development:
-1. Add this to your `
+1. Add this to your ` -->
