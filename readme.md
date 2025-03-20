@@ -27,6 +27,44 @@ It's still a work in progress, but it's already useful for viewing your models.
   - Debug mode protection
   - Middleware-based access control
 
+
+
+## Configuration
+
+The package can be configured via the `config/modelplus.php` file:
+
+- Define custom model paths
+- Configure route prefix and middleware
+- Set pagination preferences
+- Specify hidden fields
+- Control authentication requirements
+
+## Security
+
+By default, ModelPlus is only accessible in debug mode or to users with the `access-modelplus` permission. This behavior can be customized in the configuration file.
+
+## Usage
+
+Once installed, navigate to `/modelplus` in your browser to access the dashboard. The interface will automatically display all discovered models in a sidebar, allowing you to:
+
+- Browse records for each model
+- View relationships between models
+- Sort and search records
+- Navigate through related data
+- View detailed information via hover cards
+
+## Local Development
+
+For local development:
+
+1. Add this to your `composer.json`:
+
+
+
+
+
+
+# Local Development
 ## Installation
 
 1. Install the package via Composer:
