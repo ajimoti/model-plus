@@ -14,12 +14,11 @@
                         }
                     @endphp
                     @if($relatedRecord && $displayColumn)
-                        <a href="#" 
-                           @click.prevent="loadModel('{{ Str::plural(Str::snake(class_basename(get_class($relatedRecord)))) }}', null)"
-                           class="text-indigo-600 hover:text-indigo-900">
-                            {{ $relatedRecord->{$displayColumn} }}
-                            <span class="text-gray-400 text-xs">(#{{ $value }})</span>
-                        </a>
+                        @include('modelplus::partials.relation-hover-card', [
+                            'relatedRecord' => $relatedRecord,
+                            'displayColumn' => $displayColumn,
+                            'value' => $value
+                        ])
                     @else
                         <span class="text-gray-400">{{ $value ?? 'N/A' }}</span>
                     @endif
@@ -29,11 +28,7 @@
             </td>
         @endforeach
         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-            <div class="flex justify-end gap-2">
-                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                <span class="text-gray-300">|</span>
-                <a href="#" class="text-indigo-600 hover:text-indigo-900">View</a>
-            </div>
+            @include('modelplus::partials.row-actions')
         </td>
     </tr>
 @endforeach 
