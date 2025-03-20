@@ -39,10 +39,10 @@
                 @foreach($relatedRecord->getAttributes() as $attrName => $attrValue)
                     @if(!in_array($attrName, ['id', 'password', 'remember_token', 'created_at', 'updated_at', 'deleted_at']))
                         <div class="flex text-sm items-start">
-                            <span class="font-medium text-gray-500 w-1/3 flex-shrink-0">
+                            <span class="font-medium text-gray-500 w-1/3 flex-shrink-0 font-thin">
                                 {{ Str::title(str_replace('_', ' ', $attrName)) }}:
                             </span>
-                            <span class="text-gray-900 w-2/3 break-words">
+                            <span class="text-gray-900 w-2/3 break-words font-light">
                                 @if(is_null($attrValue))
                                     <span class="text-gray-400 italic">null</span>
                                 @elseif(is_bool($attrValue))

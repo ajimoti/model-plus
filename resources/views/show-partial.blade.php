@@ -197,7 +197,7 @@
                                                 'sticky-col' => $loop->first,
                                                 'bg-white' => true
                                             ])>
-                                                <div class="truncate" title="{{ $value }}">{{ $value }}</div>
+                                                <div class="truncate font-light" title="{{ $value }}">{{ $value }}</div>
                                             </td>
                                         @endif
                                     @endforeach
