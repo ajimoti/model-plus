@@ -6,6 +6,10 @@ ModelPlus is an intuitive UI package for Laravel that provides a powerful and us
 
 You can install the package via composer:
 
+```bash
+composer require ajimoti/modelplus
+```
+
 ## Available Features
 
 - **Automatic Model Discovery**: Automatically scans and discovers all Eloquent models in your application
