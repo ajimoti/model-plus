@@ -1,23 +1,10 @@
 <div class="flex justify-end gap-2">
-    <button type="button" 
-            @click.prevent="editRecord('{{ class_basename($record) }}', {{ $record->id }})"
-            class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-        Edit
-    </button>
-    
-    <span class="text-gray-300">|</span>
-    
-    <button type="button"
-            @click.prevent="viewRecord('{{ class_basename($record) }}', {{ $record->id }})"
-            class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-        View
-    </button>
-    
-    <span class="text-gray-300">|</span>
-    
-    <button type="button"
-            @click.prevent="deleteRecord('{{ class_basename($record) }}', {{ $record->id }})"
-            class="text-red-600 hover:text-red-900 font-medium text-sm">
-        Delete
-    </button>
+    <span class="inline-flex items-center">
+        <span class="text-gray-400 text-sm">
+            Actions coming soon
+            <span class="ml-2 inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                Coming Soon
+            </span>
+        </span>
+    </span>
 </div> 

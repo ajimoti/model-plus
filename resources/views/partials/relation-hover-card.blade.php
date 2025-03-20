@@ -59,15 +59,13 @@
             </div>
             
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-lg">
-                <div class="flex justify-end space-x-2">
-                    <button type="button"
-                            @click="viewDetails('{{ class_basename($relatedRecord) }}', {{ $relatedRecord->id }})"
-                            class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900">
-                        View Details
-                        <svg class="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
+                <div class="flex justify-end">
+                    <span class="text-sm text-gray-500">
+                        Detailed view coming soon
+                        <span class="ml-2 inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                            Coming Soon
+                        </span>
+                    </span>
                 </div>
             </div>
         </div>

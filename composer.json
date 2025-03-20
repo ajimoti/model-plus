@@ -1,6 +1,7 @@
 {
     "name": "vendor/modelplus",
-    "description": "An intuitive UI for browsing Laravel Eloquent models",
+    "description": "An intuitive UI for browsing Laravel Eloquent models with smart relationship handling",
+    "version": "0.1.0",
     "type": "library",
     "license": "MIT",
     "autoload": {
