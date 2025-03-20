@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Vendor\ModelPlus\Helpers;
+namespace Ajimoti\ModelPlus\Helpers;
 
 final class ViewHelpers
 {

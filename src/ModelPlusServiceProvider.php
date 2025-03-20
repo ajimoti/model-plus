@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Vendor\ModelPlus;
+namespace Ajimoti\ModelPlus;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Support\Facades\Config;
@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Container\Container;
-use Vendor\ModelPlus\Services\ModelDiscoveryService;
-use Vendor\ModelPlus\Helpers\ViewHelpers;
+use Ajimoti\ModelPlus\Services\ModelDiscoveryService;
+use Ajimoti\ModelPlus\Helpers\ViewHelpers;
 
 final class ModelPlusServiceProvider extends BaseServiceProvider
 {

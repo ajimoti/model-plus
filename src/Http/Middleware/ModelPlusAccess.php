@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Vendor\ModelPlus\Http\Middleware;
+namespace Ajimoti\ModelPlus\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Vendor\ModelPlus\Http\Controllers;
+namespace Ajimoti\ModelPlus\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Abort;
 use Illuminate\View\View as ViewResponse;
 use Illuminate\Support\Facades\App;
-use Vendor\ModelPlus\Services\ModelDiscoveryService;
+use Ajimoti\ModelPlus\Services\ModelDiscoveryService;
 // use Illuminate\Support\Facades\Request;
 
 final class ModelPlusController extends Controller

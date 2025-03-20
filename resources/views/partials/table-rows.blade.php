@@ -9,7 +9,7 @@
                         $displayColumn = null;
                         
                         if ($relatedRecord) {
-                            $displayColumn = app(Vendor\ModelPlus\Services\ModelDiscoveryService::class)
+                            $displayColumn = app(Ajimoti\ModelPlus\Services\ModelDiscoveryService::class)
                                 ->getDisplayColumnForModel($relatedRecord);
                         }
                     @endphp

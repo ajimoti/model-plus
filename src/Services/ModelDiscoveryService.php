@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Vendor\ModelPlus\Services;
+namespace Ajimoti\ModelPlus\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;

@@ -1,5 +1,5 @@
 @php
-    use Vendor\ModelPlus\Helpers\ViewHelpers;
+    use Ajimoti\ModelPlus\Helpers\ViewHelpers;
     use Illuminate\Support\Str;
 @endphp
 
